@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs'
 import {generateToken } from '../lib/util.js'
+import cloudinary from '../lib/cloudinary.js';
 export const signup = async (req, res)=>{
     const {fullname, email,password} = req.body
     try {
@@ -49,6 +50,9 @@ export const signup = async (req, res)=>{
 
 export const login = async (req,res) =>{
     const {email,password} = req.body
+    if(!email || !password){
+        return res.status(400).json({message:"all fields are required"})
+    }
     try {
         const user = await User.findOne({email})
         if(!user) return res.status(400).json({message:"Invalid Credentials"})
@@ -73,4 +77,24 @@ export const login = async (req,res) =>{
 export const logout =  (_,res) =>{
     res.cookie("jwt","",{maxAge:0})
     res.status(200).json({message:"Logged out successfully"})
+}
+export const updateprofile = async (req,res) =>{
+    const {fullname, email, password,profilePic} = req.body
+    try {
+        if(!profilePic){
+            return res.status(400).json({message:"Profile picture is required"})
+        }
+        const userId = req.user._id
+        const uploadResponse = await cloudinary.uploader.upload(profilePic)
+        const uodateUser = await User.findByIdAndUpdate(userId,{
+            fullname,
+            email,
+            password,
+            profilePic: uploadResponse.secure_url
+        },{new:true}).select('-password')
+        res.status(200).json({message:"Profile updated successfully", user:uodateUser})
+    } catch (error) {
+        console.error("Error in updateprofile controller:", error)
+        res.status(500).json({message:"internal server error"})
+    }
 }
