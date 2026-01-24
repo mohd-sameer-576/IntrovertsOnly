@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(arkjetMiddleware)
 
 router.post('/signup', signup)
-router.post('/login', arkjetMiddleware ,login)
+router.post('/login' ,login)
 router.post('/logout', logout)
 router.put('/update-profile', protectRoute, updateprofile)
 router.get('/check', protectRoute, (req,res) =>{
