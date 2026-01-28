@@ -13,7 +13,7 @@ const app = express();
 const server = createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: ENV.NODE_ENV === "production" ? ENV.CLIENT_URL : "http://localhost:5173",
+        origin: ENV.NODE_ENV === "production" ? "https://introvertsonly.onrender.com" : "http://localhost:5173",
         credentials: true
     }
 })
@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: ENV.NODE_ENV === "production" ? ENV.CLIENT_URL : "http://localhost:5173",
+    origin: ENV.NODE_ENV === "production" ? "https://introvertsonly.onrender.com" : "http://localhost:5173",
     credentials: true
 }))
 app.use("/api/auth", authRouter)
@@ -69,6 +69,7 @@ app.use("/api/message", messageRouter)
 if(ENV.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname, "../frontend/dist")))
 
+    // Serve index.html for all non-API routes (for React Router)
     app.get("/", (_,res) =>{
         res.sendFile(path.join(__dirname, "../frontend","dist","index.html"))
     })
