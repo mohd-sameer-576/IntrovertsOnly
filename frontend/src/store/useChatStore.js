@@ -40,18 +40,20 @@ export const useChatStore = create((set, get) => ({
         { text }
       );
 
-      // Send via Socket.IO for real-time
+      // Add message to local state immediately
+      set({ messages: [...messages, res.data] });
+
+      // Send via Socket.IO for real-time to receiver
       const socket = getSocket();
       if(socket) {
         socket.emit('sendMessage', {
           receiverId: selectedUser._id,
           senderId: authUser._id,
+          messageId: res.data._id,
           text,
           image: null
         })
       }
-
-      set({ messages: [...messages, res.data] });
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -71,7 +73,11 @@ export const useChatStore = create((set, get) => ({
       
       // Only add if from selected user
       if(selectedUser && data.senderId === selectedUser._id) {
-        set({ messages: [...messages, data] });
+        // Check if message already exists to avoid duplicates
+        const messageExists = messages.some(msg => msg._id === data._id);
+        if(!messageExists) {
+          set({ messages: [...messages, data] });
+        }
       }
     })
   },

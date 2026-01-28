@@ -4,7 +4,10 @@ let socket = null
 
 export const initSocket = (userId) => {
   if(!socket) {
-    socket = io("http://localhost:3000", {
+    // Use the same origin in production, localhost in development
+    const socketURL = import.meta.env.MODE === "development" ? "http://localhost:3000" : window.location.origin
+    
+    socket = io(socketURL, {
       auth: {
         userId
       },
@@ -16,7 +19,7 @@ export const initSocket = (userId) => {
     })
     
     socket.on('connect', () => {
-      console.log('Socket connected:')
+      console.log('Socket connected:', socket.id)
     })
     
     socket.on('connect_error', (error) => {
