@@ -62,4 +62,8 @@ export const useAuthStore = create((set) => ({
       toast.error(err.response?.data?.message || "Logout failed");
     }
   },
+  updateUser: (updatedUser) => {
+    set({ authUser: updatedUser });
+    toast.success("Profile updated successfully!");
+  },
 }));
