@@ -7,8 +7,32 @@ export const getAllUsers = async (req, res) => {
     // Logic to get all users
     try {
         const loggedInUserId = req.user._id;
+        
+        // Get all users except the logged-in user
         const users = await User.find({ _id: { $ne: loggedInUserId } }).select('-password');
-        res.status(200).json(users);
+        
+        // Get all messages involving the logged-in user
+        const messages = await Message.find({
+            $or: [{ sender: loggedInUserId }, { receiverId: loggedInUserId }]
+        });
+
+        // Extract unique user IDs from messages
+        const usersWithChatSet = new Set();
+        messages.forEach(msg => {
+            if (msg.sender.toString() === loggedInUserId.toString()) {
+                usersWithChatSet.add(msg.receiverId.toString());
+            } else {
+                usersWithChatSet.add(msg.sender.toString());
+            }
+        });
+
+        // Add hasChat property to each user
+        const usersWithChatInfo = users.map(user => ({
+            ...user.toObject(),
+            hasChat: usersWithChatSet.has(user._id.toString())
+        }));
+
+        res.status(200).json(usersWithChatInfo);
     } catch (error) {
 
         res.status(500).json({ message: "Error fetching users", error: error.message });
