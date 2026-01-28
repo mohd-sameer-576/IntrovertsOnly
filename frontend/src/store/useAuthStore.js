@@ -37,4 +37,29 @@ export const useAuthStore = create((set) => ({
       set({ isSigningUp: false });
     }
   },
+  login: async (email, password) => {
+    set({ isSigningUp: true });
+    try {
+      const res = await axiosInstance.post("/auth/login", {
+        email,
+        password,
+      });
+      set({ authUser: res.data });
+      toast.success("Login successful!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Login failed");
+      set({ authUser: null });
+    } finally {
+      set({ isSigningUp: false });
+    }
+  },
+  logout: async () => {
+    try {
+      await axiosInstance.post("/auth/logout");
+      set({ authUser: null });
+      toast.success("Logged out successfully!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Logout failed");
+    }
+  },
 }));
