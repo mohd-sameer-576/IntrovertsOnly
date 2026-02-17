@@ -34,7 +34,7 @@ const UsersSidebar = ({ showUsers, onClose }) => {
   return (
     <div
       className={`
-    fixed md:static z-40 h-full w-[80%] md:w-[22%]
+    fixed md:static z-40 h-full w-[80%] md:w-full
     bg-white/5 backdrop-blur-xl border-r border-white/10 p-5
     transition-transform duration-300
     ${showUsers ? "translate-x-0" : "-translate-x-full md:translate-x-0"}

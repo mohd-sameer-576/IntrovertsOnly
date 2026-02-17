@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
-import { Menu, User, Settings2, Trash2, LogOut, MessageSquare } from "lucide-react";
+import { Menu, User, LogOut, MessageSquare, MoreVertical, Users, X } from "lucide-react";
 import UsersSidebar from "../components/UsersSidebar";
 import ChatArea from "../components/ChatArea";
 import ProfilePanel from "../components/ProfilePanel";
@@ -11,9 +11,11 @@ const ChatPage = () => {
   const { authUser, logout } = useAuthStore();
   const { getUsers, initializeSocket, disconnectSocket } = useChatStore();
 
-  const [showUsers, setShowUsers] = useState(true); // Default to true for desktop
+  // Controlled states for panels
+  const [showUsers, setShowUsers] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     getUsers();
@@ -21,47 +23,74 @@ const ChatPage = () => {
     return () => disconnectSocket();
   }, [authUser?._id, getUsers, initializeSocket, disconnectSocket]);
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("Permanent action: Delete your account?")) return;
-    try {
-      const response = await fetch("http://localhost:3000/api/auth/delete-account", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to delete account");
-      alert("Account deleted");
-      logout();
-    } catch (error) {
-      console.error(error);
-    }
+  const toggleUsers = () => {
+    setShowUsers(!showUsers);
+    setShowProfile(false); // Close profile if opening users
+    setMobileMenuOpen(false);
+  };
+
+  const toggleProfile = () => {
+    setShowProfile(!showProfile);
+    setShowUsers(false); // Close users if opening profile
+    setMobileMenuOpen(false);
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#020617] p-0 md:p-6 flex items-center justify-center font-sans overflow-hidden">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-600/10 blur-[120px] animate-pulse pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/10 blur-[120px] animate-pulse delay-700 pointer-events-none" />
+    <div className="min-h-screen w-full bg-[#020617] flex flex-col md:items-center md:justify-center font-sans overflow-hidden">
+      
+      {/* MOBILE TOP NAVBAR */}
+      <div className="md:hidden w-full h-16 px-6 flex items-center justify-between bg-slate-950/50 backdrop-blur-md border-b border-white/5 z-10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+            <MessageSquare className="text-white w-5 h-5" />
+          </div>
+          <span className="text-white font-bold tracking-tight">MESSENGER</span>
+        </div>
 
-      {/* Main Glass Container */}
-      <div className="relative h-screen md:h-[94vh] w-full max-w-[1600px] flex overflow-hidden 
-                      bg-slate-950/40 backdrop-blur-3xl md:rounded-[2.5rem] border border-white/5 
-                      shadow-2xl">
+        <div className="relative">
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-slate-400 hover:text-white transition-colors"
+          >
+            {mobileMenuOpen ? <X /> : <MoreVertical />}
+          </button>
+
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl py-2 z-[60] animate-in fade-in zoom-in duration-200">
+              <button onClick={toggleUsers} className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-white/5">
+                <Users className="w-5 h-5" /> Contacts
+              </button>
+              <button onClick={toggleProfile} className="w-full flex items-center gap-3 px-4 py-3 text-slate-300 hover:bg-white/5">
+                <User className="w-5 h-5" /> Profile
+              </button>
+              <hr className="border-white/5 my-1" />
+              <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10">
+                <LogOut className="w-5 h-5" /> Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* MAIN CONTAINER */}
+      <div className="relative h-[calc(100vh-64px)] md:h-[94vh] w-full max-w-[1600px] flex overflow-hidden 
+                      bg-slate-950/40 backdrop-blur-3xl md:rounded-[2.5rem] border border-white/5 shadow-2xl">
         
-        {/* 1. Side Navigation Rail */}
+        {/* DESKTOP SIDE RAIL */}
         <nav className="hidden md:flex w-20 flex-col items-center py-8 border-r border-white/5 bg-black/20 space-y-8">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
             <MessageSquare className="text-white w-6 h-6" />
           </div>
           <div className="flex-1 flex flex-col space-y-6">
             <button 
-              onClick={() => {setShowUsers(true); setShowProfile(false)}} 
+              onClick={toggleUsers} 
               className={`p-3 rounded-xl transition-all ${showUsers ? "bg-blue-500/10 text-blue-400" : "text-slate-500 hover:bg-white/5 hover:text-slate-300"}`}
             >
-              <Menu className="w-6 h-6" />
+              <Users className="w-6 h-6" />
             </button>
             <button 
-              onClick={() => {setShowProfile(true); setShowUsers(false)}} 
+              onClick={toggleProfile} 
               className={`p-3 rounded-xl transition-all ${showProfile ? "bg-fuchsia-500/10 text-fuchsia-400" : "text-slate-500 hover:bg-white/5 hover:text-slate-300"}`}
             >
               <User className="w-6 h-6" />
@@ -72,30 +101,40 @@ const ChatPage = () => {
           </button>
         </nav>
 
-        {/* 2. Content Area */}
+        {/* DYNAMIC PANELS */}
         <div className="flex flex-1 h-full overflow-hidden relative">
-          <UsersSidebar showUsers={showUsers} onClose={() => setShowUsers(false)} />
           
-          <main className="flex-1 flex flex-col min-w-0 bg-gradient-to-b from-transparent to-black/20">
+          {/* Users Sidebar - Slide in from left */}
+          <div className={`
+            absolute md:relative z-100 h-full w-full md:w-[320px] transition-all duration-300 ease-in-out
+            ${showUsers ? "translate-x-0" : "-translate-x-full md:hidden"}
+          `}>
+            <UsersSidebar showUsers={showUsers} onClose={() => setShowUsers(false)} />
+          </div>
+          
+          {/* Main Chat Area */}
+          <main className="flex-1 flex flex-col min-w-0 bg-gradient-to-b from-transparent to-black/10">
             <ChatArea />
           </main>
 
-          <ProfilePanel 
-            showProfile={showProfile} 
-            onClose={() => setShowProfile(false)} 
-            onEdit={() => setShowEditForm(true)} 
-            onDelete={handleDeleteAccount} 
-          />
-        </div>
-
-        {/* Mobile View Toggle (Overlay for mobile users) */}
-        <div className="md:hidden fixed bottom-6 right-6 z-50 flex gap-3">
-            <button onClick={() => setShowUsers(!showUsers)} className="p-4 bg-blue-600 rounded-full shadow-lg text-white"><Menu /></button>
-            <button onClick={() => setShowProfile(!showProfile)} className="p-4 bg-fuchsia-600 rounded-full shadow-lg text-white"><User /></button>
+          {/* Profile Panel - Slide in from right */}
+          <div className={`
+            absolute md:relative right-0 z-40 h-full w-[280px] md:w-[320px] transition-all duration-300 ease-in-out
+            ${showProfile ? "translate-x-0" : "translate-x-full md:hidden"}
+          `}>
+            <ProfilePanel 
+              showProfile={showProfile} 
+              onClose={() => setShowProfile(false)} 
+              onEdit={() => setShowEditForm(true)} 
+              onDelete={() => {}} // Connect your delete function
+            />
+          </div>
         </div>
 
         <EditProfileModal isOpen={showEditForm} onClose={() => setShowEditForm(false)} />
       </div>
+
+    
     </div>
   );
 };

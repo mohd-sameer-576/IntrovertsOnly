@@ -6,7 +6,7 @@ const ProfilePanel = ({ showProfile, onClose, onEdit, onDelete }) => {
   return (
     <div
       className={`
-    fixed md:static right-0 z-60 h-full w-[80%] md:w-[22%]
+    fixed md:static right-0 z-60 h-full w-[80%] md:w-full
     bg-white/5 backdrop-blur-xl border-l border-white/10 p-6
     transition-transform duration-300
     ${showProfile ? "translate-x-0" : "translate-x-full md:translate-x-0"}
