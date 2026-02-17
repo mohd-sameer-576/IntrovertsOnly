@@ -25,7 +25,7 @@ const SignupPage = () => {
 
   return (
     <Shell>
-      <div className="w-full px-8 py-10 flex flex-col items-center">
+      <div className="w-full  px-18 py-10 flex flex-col items-center">
         {/* Header Icon */}
         <div className="w-14 h-14 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(59,130,246,0.15)]">
           <UserPlus className="w-6 h-6 text-blue-400" />
