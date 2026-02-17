@@ -58,9 +58,10 @@ io.on('connection', (socket) => {
 })
 
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 app.use(cors({
-    origin: ENV.NODE_ENV === "production" ? "https://introvertsonly.onrender.com" : "http://localhost:5173",
+    origin:["https://introvertsonly.onrender.com", "http://localhost:5173"],
     credentials: true
 }))
 app.use("/api/auth", authRouter)
