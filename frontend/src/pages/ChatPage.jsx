@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
+import { Menu, User, Settings2, Trash2, LogOut } from "lucide-react"; // Added for modern icons
 import UsersSidebar from "../components/UsersSidebar";
 import ChatArea from "../components/ChatArea";
 import ProfilePanel from "../components/ProfilePanel";
@@ -16,86 +17,83 @@ const ChatPage = () => {
 
   useEffect(() => {
     getUsers();
-    // Initialize Socket.IO
-    if (authUser?._id) {
-      initializeSocket(authUser._id);
-    }
-
-    return () => {
-      disconnectSocket();
-    };
+    if (authUser?._id) initializeSocket(authUser._id);
+    return () => disconnectSocket();
   }, [authUser?._id, getUsers, initializeSocket, disconnectSocket]);
 
   const handleDeleteAccount = async () => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
+    if (!window.confirm("Permanent action: Delete your account?")) return;
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/delete-account",
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to delete account");
-      }
-
-      alert("Account deleted successfully");
+      const response = await fetch("http://localhost:3000/api/auth/delete-account", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to delete account");
+      alert("Account deleted");
       logout();
     } catch (error) {
-      console.error("Error deleting account:", error);
-      alert(error.message || "An error occurred while deleting the account");
+      console.error(error);
     }
   };
 
   return (
-    <div
-      className="h-[92vh] w-[95vw] mx-auto mt-4 rounded-[2.5rem]
-bg-linear-to-br from-[#0b1220] via-[#0e1629] to-[#0b1220]
-border border-fuchsia-500/40 shadow-[0_0_60px_-15px_rgba(217,70,239,0.6)]
-flex overflow-hidden text-white relative"
-    >
-      {/* MOBILE TOP BAR */}
-      <div className="absolute top-4 left-4 right-4 flex justify-between md:hidden z-50">
-        <button
-          onClick={() => setShowUsers(true)}
-          className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur"
-        >
-          ☰ Chats
-        </button>
-        <button
-          onClick={() => setShowProfile(true)}
-          className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur"
-        >
-          ⚙ Profile
-        </button>
-      </div>
+    <div className="min-h-screen w-full bg-[#05070a] p-2 md:p-6 flex items-center justify-center font-sans">
+      {/* MAIN CONTAINER */}
+      <div className="relative h-[94vh] w-full max-w-400 flex overflow-hidden
+                      bg-[#0b0e14]/80 backdrop-blur-2xl
+                      rounded-4xl border border-white/5 
+                      shadow-[0_0_80px_-20px_rgba(0,0,0,0.8)]">
+        
+        {/* DECORATIVE AMBIENCE (Glows) */}
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-fuchsia-600/10 blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] pointer-events-none" />
 
-      <UsersSidebar showUsers={showUsers} onClose={() => setShowUsers(false)} />
-      <ChatArea />
-      <ProfilePanel
-        showProfile={showProfile}
-        onClose={() => setShowProfile(false)}
-        onEdit={() => setShowEditForm(true)}
-        onDelete={handleDeleteAccount}
-      />
-      <EditProfileModal
-        isOpen={showEditForm}
-        onClose={() => setShowEditForm(false)}
-      />
+        {/* MOBILE HEADER */}
+        <div className="absolute top-0 left-0 right-0 h-16 flex items-center justify-between px-6 md:hidden z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
+          <button 
+            onClick={() => setShowUsers(!showUsers)}
+            className="p-2 hover:bg-white/5 rounded-full transition-colors"
+          >
+            <Menu className="w-6 h-6 text-fuchsia-400" />
+          </button>
+          <span className="font-bold tracking-tight bg-linear-to-r from-fuchsia-400 to-blue-400 bg-clip-text text-transparent">
+            MESSENGER
+          </span>
+          <button 
+            onClick={() => setShowProfile(!showUsers)}
+            className="p-2 hover:bg-white/5 rounded-full transition-colors"
+          >
+            <User className="w-6 h-6 text-blue-400" />
+          </button>
+        </div>
+
+        {/* SIDEBARS & CONTENT */}
+        <div className="flex w-full h-full pt-16 md:pt-0">
+          <UsersSidebar 
+            showUsers={showUsers} 
+            onClose={() => setShowUsers(false)} 
+            className="border-r border-white/5 bg-black/10"
+          />
+          
+          <main className="flex-1 relative flex flex-col min-w-0 bg-linear-to-b from-transparent to-black/20">
+            <ChatArea />
+          </main>
+
+          <ProfilePanel
+            showProfile={showProfile}
+            onClose={() => setShowProfile(false)}
+            onEdit={() => setShowEditForm(true)}
+            onDelete={handleDeleteAccount}
+          />
+        </div>
+
+        {/* MODALS */}
+        <EditProfileModal
+          isOpen={showEditForm}
+          onClose={() => setShowEditForm(false)}
+        />
+      </div>
     </div>
   );
 };
