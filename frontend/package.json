@@ -12,11 +12,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",
-<<<<<<< HEAD
-    "lucide-react": "^0.574.0",
-=======
+
     "lucide-react": "^0.563.0",
->>>>>>> 4911677ed668869e1e4a92e9fd922e098e5435ca
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hot-toast": "^2.6.0",
